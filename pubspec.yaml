@@ -1,0 +1,8 @@
+name: marky
+version: 0.0.1
+description: A sample web application
+dependencies:
+  browser: any
+  range: 1.1.0
+dev_dependencies:
+#  unittest: any
