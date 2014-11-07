@@ -1,6 +1,6 @@
 library marked.test;
 
-import 'package:marked/marked.dart';
+import 'package:marked/dart_marked.dart';
 import 'package:unittest/unittest.dart';
 import 'dart:io';
 import 'dart:async';

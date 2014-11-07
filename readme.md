@@ -8,7 +8,9 @@ See https://github.com/chjj/marked for more details
 For simplest usage, import `dart-marked` and use `marked` function, like below:
 
 ```dart
-import 'package:dart_marked/dart_marked.dart'
+import 'package:dart_marked/dart_marked.dart';
 
-marked('#Some markdown here');
+main() {
+    marked('#Some markdown here').then((response) => print(response));
+}
 ```
