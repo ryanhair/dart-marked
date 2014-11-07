@@ -20,7 +20,7 @@ class Renderer {
             }
         }
 
-        if (lang == null) {
+        if (lang == null || lang == '') {
             return '<pre><code>'
             + (escaped ? code : escape(code, true))
             + '\n</code></pre>';
@@ -35,7 +35,7 @@ class Renderer {
     }
 
     String blockquote(String quote) {
-        return '<blockquote>\n' + quote + '</blockquote>\n';
+        return '<blockquote>\n$quote</blockquote>\n';
     }
 
     String html(String html) {

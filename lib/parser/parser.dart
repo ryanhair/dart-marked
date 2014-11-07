@@ -75,7 +75,7 @@ class Parser {
                     for (var j = 0; j < row.length; j++) {
                         cell += options.renderer.tablecell(
                             lexer.output(row[j]),
-                            new TableCellFlags(header: false, align: this.token.align[j])
+                            new TableCellFlags(header: false, align: j < token.align.length ? token.align[j] : null)
                         );
                     }
 

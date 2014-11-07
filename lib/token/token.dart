@@ -11,5 +11,5 @@ class Token {
     bool ordered;
     bool pre;
     bool escaped;
-    Token(this.type, {this.text: '', this.lang: '', this.depth: 0, this.header: null, this.align: null, this.cells: null, this.ordered: false, this.pre: false});
+    Token(this.type, {this.text: '', this.lang: '', this.depth: 0, this.header: null, this.align: null, this.cells: null, this.ordered: false, this.pre: false, this.escaped: false});
 }

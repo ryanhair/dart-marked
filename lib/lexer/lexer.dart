@@ -9,10 +9,10 @@ class Lexer {
     }
 
     List<Token> lex(String src) {
-        src.replaceAll('\r\n|\r', '\n')
-        .replaceAll('\t', '    ')
-        .replaceAll('\u00a0', ' ')
-        .replaceAll('\u2424', '\n');
+        src = src.replaceAll(new RegExp('\r\n|\r'), '\n')
+        .replaceAll(new RegExp('\t'), '    ')
+        .replaceAll(new RegExp('\u00a0'), ' ')
+        .replaceAll(new RegExp('\u2424'), '\n');
         return token(src, true);
     }
 
@@ -25,7 +25,9 @@ class Lexer {
             cap = options.rules.newline.firstMatch(src);
             if (cap != null) {
                 src = src.substring(cap[0].length);
-                tokens.add(new Token('space'));
+                if(cap[0].length > 1) {
+                    tokens.add(new Token('space'));
+                }
             }
 
             // code
@@ -33,15 +35,15 @@ class Lexer {
             if (cap != null) {
                 src = src.substring(cap[0].length);
                 var res = cap[0].replaceAll(new RegExp(r'^ {4}', multiLine: true), '');
-                this.tokens.add(new Token('code', text: !options.pedantic ? res.replaceFirst(new RegExp(r'\n+$'), '') : res));
+                tokens.add(new Token('code', text: !options.pedantic ? res.replaceFirst(new RegExp(r'\n+$'), '') : res));
                 continue;
             }
 
             // fences (gfm)
-            cap = options.rules.fences.firstMatch(src);
+            cap = options.rules.fences != null ? options.rules.fences.firstMatch(src) : null;
             if (cap != null) {
                 src = src.substring(cap[0].length);
-                this.tokens.add(new Token('code', text: cap[3], lang: cap[2]));
+                tokens.add(new Token('code', text: cap[3], lang: cap[2]));
                 continue;
             }
 
@@ -49,12 +51,12 @@ class Lexer {
             cap = options.rules.heading.firstMatch(src);
             if (cap != null) {
                 src = src.substring(cap[0].length);
-                this.tokens.add(new Token('heading', depth: cap[1].length, text: cap[2]));
+                tokens.add(new Token('heading', depth: cap[1].length, text: cap[2]));
                 continue;
             }
 
             // table no leading pipe (gfm)
-            cap = options.rules.nptable.firstMatch(src);
+            cap = options.rules.nptable != null ? options.rules.nptable.firstMatch(src) : null;
             if (top && cap != null) {
                 src = src.substring(cap[0].length);
 
@@ -79,9 +81,9 @@ class Lexer {
                     }
                 }
 
-                item.cells = cells.map((c) => c.split(r' *\| *'));
+                item.cells = cells.map((c) => c.split(new RegExp(r' *\| *'))).toList();
 
-                this.tokens.add(item);
+                tokens.add(item);
 
                 continue;
             }
@@ -98,7 +100,7 @@ class Lexer {
             cap = options.rules.hr.firstMatch(src);
             if (cap != null) {
                 src = src.substring(cap[0].length);
-                this.tokens.add(new Token('hr'));
+                tokens.add(new Token('hr'));
                 continue;
             }
 
@@ -114,9 +116,9 @@ class Lexer {
                 // Pass `top` to keep the current
                 // "toplevel" state. This is exactly
                 // how markdown.pl works.
-                this.token(result, top, bq: true);
+                token(result, top, bq: true);
 
-                this.tokens.add(new Token('blockquote_end'));
+                tokens.add(new Token('blockquote_end'));
 
                 continue;
             }
@@ -143,7 +145,7 @@ class Lexer {
 
                     // Outdent whatever the
                     // list item contains. Hacky.
-                    if ((~match.indexOf('\n ')) == 0) {
+                    if ((~match.indexOf('\n ')) != 0) {
                         space -= match.length;
                         if (space > 0) {
                             match = !options.pedantic
@@ -174,12 +176,12 @@ class Lexer {
                     tokens.add(new Token(loose ? 'loose_item_start' : 'list_item_start'));
 
                     // Recurse.
-                    this.token(match, false, bq: bq);
+                    token(match, false, bq: bq);
 
                     tokens.add(new Token('list_item_end'));
                 }
 
-                this.tokens.add(new Token('list_end'));
+                tokens.add(new Token('list_end'));
 
                 continue;
             }
@@ -188,7 +190,7 @@ class Lexer {
             cap = options.rules.html.firstMatch(src);
             if (cap != null) {
                 src = src.substring(cap[0].length);
-                tokens.add(new Token(this.options.sanitize ? 'paragraph' : 'html',
+                tokens.add(new Token(options.sanitize ? 'paragraph' : 'html',
                 pre: cap[1] == 'pre' || cap[1] == 'script' || cap[1] == 'style',
                 text: cap[0]));
                 continue;
@@ -203,14 +205,14 @@ class Lexer {
             }
 
             // table (gfm)
-            cap = options.rules.table.firstMatch(src);
+            cap = options.rules.table != null ? options.rules.table.firstMatch(src) : null;
             if (top && cap != null) {
                 src = src.substring(cap[0].length);
 
-                var cells = cap[3].replaceFirst(new RegExp(r'(?: *\| *)?\n$'), '').split('\n');
+                var cells = cap[3].replaceFirst(new RegExp(r'(?: *\| *)?\n$'), '').split(new RegExp(r'\n'));
                 var item = new Token('table',
-                header: cap[1].replaceAll(new RegExp(r'^ *| *\| *$'), '').split(new RegExp(r' *\| *')),
-                align: cap[2].replaceAll(new RegExp(r'^ *|\| *$'), '').split(new RegExp(r' *\| *')));
+                    header: cap[1].replaceAll(new RegExp(r'^ *| *\| *$'), '').split(new RegExp(r' *\| *')),
+                    align: cap[2].replaceAll(new RegExp(r'^ *|\| *$'), '').split(new RegExp(r' *\| *')));
 
                 for (var i = 0; i < item.align.length; i++) {
                     if (new RegExp(r'^ *-+: *$').hasMatch(item.align[i])) {
@@ -225,9 +227,12 @@ class Lexer {
                 }
 
                 for (var i = 0; i < cells.length; i++) {
+                    if(item.cells == null) {
+                        item.cells = new List<List<String>>();
+                    }
                     item.cells.add(cells[i]
-                    .replaceAll(new RegExp(r'/^ *\| *| *\| *$'), '')
-                    .split(new RegExp(r' *\| */')));
+                    .replaceAll(new RegExp(r'^ *\| *| *\| *$'), '')
+                    .split(new RegExp(r' *\| *')));
                 }
 
                 tokens.add(item);
@@ -249,7 +254,7 @@ class Lexer {
             if (cap != null) {
                 // Top-level should never reach here.
                 src = src.substring(cap[0].length);
-                this.tokens.add(new Token('text', text: cap[0]));
+                tokens.add(new Token('text', text: cap[0]));
                 continue;
             }
 

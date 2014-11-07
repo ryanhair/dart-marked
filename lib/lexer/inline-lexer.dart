@@ -29,7 +29,7 @@ class InlineLexer {
                     : mangle(cap[1]);
                     href = mangle('mailto:') + text;
                 } else {
-                    var text = escape(cap[1]);
+                    text = escape(cap[1]);
                     href = text;
                 }
                 out += options.renderer.link(href, null, text);
@@ -37,7 +37,7 @@ class InlineLexer {
             }
 
             // url (gfm)
-            cap = options.inlineRules.url.firstMatch(src);
+            cap = options.inlineRules.url != null ? options.inlineRules.url.firstMatch(src) : null;
             if (!inLink && cap != null) {
                 src = src.substring(cap[0].length);
                 var text = escape(cap[1]);
@@ -136,7 +136,7 @@ class InlineLexer {
             }
 
             // del (gfm)
-            cap = options.inlineRules.del.firstMatch(src);
+            cap = options.inlineRules.del != null ? options.inlineRules.del.firstMatch(src) : null;
             if (cap != null) {
                 src = src.substring(cap[0].length);
                 out += options.renderer.del(this.output(cap[1]));
@@ -164,7 +164,7 @@ class InlineLexer {
         title = link.title != null && link.title.isNotEmpty ? escape(link.title) : null;
 
         return cap[0][0] != '!'
-        ? options.renderer.link(href, title, this.output(cap[1]))
+        ? options.renderer.link(href, title, output(cap[1]))
         : options.renderer.image(href, title, escape(cap[1]));
     }
 
@@ -174,11 +174,11 @@ class InlineLexer {
         // em-dashes
         .replaceAll(new RegExp(r'--'), '\u2014')
         // opening singles
-        .replaceAllMapped(new RegExp(r"(^|[-\u2014/(\[{" + '"' + "\s])'"), (match) => '\\${match[1]}u2018')
+        .replaceAllMapped(new RegExp(r"(^|[-\u2014/(\[{" + '"' + r"\s])'"), (match) => '${match[1]}\u2018')
         // closing singles & apostrophes
         .replaceAll(new RegExp(r"'"), '\u2019')
         // opening doubles
-        .replaceAll(new RegExp(r'(^|[-\u2014/(\[{\u2018\s])"'), '\$1\u201c')
+        .replaceAllMapped(new RegExp(r'(^|[-\u2014/(\[{\u2018\s])"'), (match) => '${match[1]}\u201c')
         // closing doubles
         .replaceAll(new RegExp(r'"'), '\u201d')
         // ellipses
