@@ -1,4 +1,4 @@
-#MarkedDart
+#DartMarked
 
 A Dart port of the fantastic `marked` javascript library.
 See https://github.com/chjj/marked for more details

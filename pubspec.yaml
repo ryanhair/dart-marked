@@ -1,4 +1,4 @@
-name: marked
+name: dart_marked
 version: 0.0.1
 description: A sample web application
 dependencies:
