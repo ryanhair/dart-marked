@@ -1,6 +1,6 @@
 library marked.test;
 
-import 'package:marked/dart_marked.dart';
+import 'package:dart_marked/dart_marked.dart';
 import 'package:unittest/unittest.dart';
 import 'dart:io';
 import 'dart:async';
@@ -16,8 +16,8 @@ main() {
     //gfm-tables grammar + inline-gfm-breaks grammar
 
     Future<bool> compare(MarkedOptions options, String name) {
-        var file = new File(Platform.script.toFilePath());
-        var dataDir = new Directory(file.parent.path + '/data');
+        var file = new File(Platform.packageRoot);
+        var dataDir = new Directory(file.parent.path + '/test/data');
         var ampsAndAnglesHtml = new File(dataDir.path + '/$name.html');
         var ampsAndAnglesText = new File(dataDir.path + '/$name.text');
 
